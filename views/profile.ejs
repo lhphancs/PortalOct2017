@@ -1,0 +1,69 @@
+<% include header %>
+
+<div class="container">
+    <form id="profile-form">
+        <div class="form-group row">
+            <label for="name" class="col-sm-2 col-form-label">Name</label>
+            <div class="col-sm-10">
+              <input name="name" type="text" class="form-control" id="name" placeholder="Name" value="<%= user.name %>" required />
+            </div>
+          </div>
+      <div class="form-group row">
+        <label for="email" class="col-sm-2 col-form-label">Email</label>
+        <div class="col-sm-10">
+          <input name="email" type="email" class="form-control" id="email" placeholder="Email" value="<%= user.email %>" required />
+        </div>
+      </div>
+
+      <div class="form-group row">
+          <label for="location" class="col-sm-2 col-form-label">Location</label>
+          <div class="col-sm-10">
+            <input name="location" type="text" class="form-control" id="location" placeholder="Location" value="<%= user.location.name %>" required />
+          </div>
+        </div>
+    
+      <button class="btn btn-success" type="submit">Update Profile</button>
+    </form>
+</div>
+
+
+<script>
+  var form = null;
+  var locationField = null;
+  $(function() {
+    form = $('#profile-form');
+    locationField = $('#location');
+    form.on('submit', function(e) {
+      e.preventDefault();
+      var profileData = new FormData(form[0]);
+      // GEOCODE LOCATION
+      var locationName = locationField.val().trim();
+      $.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${locationName}&key=AIzaSyAp1-GKiZX19UcOZjRaTLlurgboIyS6UT8`)
+        .then(function(resp) {
+          var geoResult = resp.results[0];
+          var realLocationName = geoResult.formatted_address;
+          var coords = geoResult.geometry.location;
+          profileData.set('location', realLocationName);
+          profileData.set('lat', coords.lat);
+          profileData.set('lng', coords.lng);
+          $.ajax({
+            url: '/user',
+            type: 'PATCH',
+            cache: false,
+            contentType: false,
+            processData: false,
+            data: profileData
+          })
+          .then(function(resp) {
+            console.log(resp);
+            locationField.val(resp.location.name);
+          })
+          .catch(function(err) {
+            console.error(err);
+          })
+        })
+    })
+  });
+</script>
+
+<% include footer %>
