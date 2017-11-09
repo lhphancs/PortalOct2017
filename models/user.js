@@ -7,13 +7,13 @@ var userSchema = mongoose.Schema({
   name: String,
   email: String,
   password: String,
-  // location: {
-  //   name: { type: String },
-  //   geo: {
-  //     type: { type: String },
-  //     coordinates: { type: Array },
-  //   }
-  // },
+  location: {
+    name: { type: String, default: null },
+    geo: {
+      type: { type: String, default: 'Point' },
+      coordinates: { type: Array, default: [0, 0] },
+    }
+  },
   description: String,
   tags: [String],
   education: String,

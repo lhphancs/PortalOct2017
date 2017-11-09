@@ -60,11 +60,27 @@ router.get('/random', function(req, res) {
   ];
 
   const randomLocations = [
-    'Irvine, CA',
-    'San Francisco, CA',
-    'Los Angeles, CA',
-    'New York City, NY',
-    'Miami, FL'
+    {
+      name: 'Irvine, CA',
+      geo: {
+        type: 'Point',
+        coordinates: [-117.735588, 33.696281]
+      }
+    },
+    {
+      name: 'San Francisco, CA',
+      geo: {
+        type: 'Point',
+        coordinates: [-122.431297, 37.773972]
+      }
+    },
+    {
+      name: 'Los Angeles, CA',
+      geo: {
+        type: 'Point',
+        coordinates: [-118.243683, 34.052235]
+      }
+    }
   ];
 
   const randomSchools = [
@@ -108,7 +124,7 @@ router.get('/random', function(req, res) {
             let newUser = new UserModel({
               name: `${userInfo.name.first} ${userInfo.name.last}`,
               email: userInfo.email,
-              password: userInfo.login.password,
+              password: UserModel.hashPassword('asdfasdf'),
               description: `Hey guys, my name's ${userInfo.name.first} ${userInfo
                 .name.last}`,
               // school: randomSchool,
@@ -116,7 +132,7 @@ router.get('/random', function(req, res) {
               // minor: randomMinor,
               // gpa: randomGPA,
               tags: tags,
-              // location: randomLocation,
+              location: randomLocation,
               photo: userInfo.picture.large
             });
   
@@ -128,6 +144,7 @@ router.get('/random', function(req, res) {
               // res.json(user);
             });
           })
+        res.end();
       }
     )
     .catch(function(error) {
@@ -161,6 +178,7 @@ router.post('/', function(req, res) {
   var body = req.body;
   var hashedPassword = UserModel.hashPassword(body.password);
   body.password = hashedPassword;
+  
   UserModel.create(body)
     .then(function(newUser) {
       res.status(201).json(newUser);
