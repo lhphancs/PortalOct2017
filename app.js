@@ -9,6 +9,7 @@ var session = require('client-sessions');
 var UserModel = require('./models/user');
 var index = require('./routes/index');
 var users = require('./routes/users');
+var chat = require('./routes/chat');
 
 var app = express();
 var mongoose = require('mongoose');
@@ -28,12 +29,11 @@ app.set('view engine', 'ejs');
 app.use(session({
   cookieName: 'session',
   secret: 'asdlfj;alsdfjasdlkjf',
-  duration: 30 * 60 * 1000,
-  activeDuration: 5 * 60 * 1000,
+  duration: 30000000 * 60 * 1000,
+  activeDuration: 500000 * 60 * 1000,
 }));
 
 app.use(function(req, res, next) {
-  console.log('checking user session');
   if (req.session && req.session.user) {
     UserModel.findOne({ email: req.session.user.email }, function(err, user) {
       if (user) {
@@ -57,6 +57,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
 app.use('/user', users);
+app.use('/chat', chat);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

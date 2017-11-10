@@ -6,3 +6,66 @@ body {
 a {
   color: #00B7FF;
 }
+
+#chat-section {
+  margin-top: 40px;
+}
+
+#users-list li {
+  cursor: pointer;
+}
+
+.selected-user {
+  background: pink;
+  color: red;
+  font-weight: bold;
+}
+
+#messages-container {
+  width: 100%;
+  border: 1px solid red;
+  position: relative;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+#message-input-container {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+
+#message-list-container {
+  position: absolute;
+  bottom: 40px;
+  width: 100%;
+  max-height: calc(100% - 40px);
+  overflow: auto;
+}
+
+#message-list {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+#message-list li {
+  margin: 10px 0;
+}
+
+.message > div {
+  padding: 10px 20px;
+  background-color: #e8e8e8;
+  color: black;
+  display: inline-block;
+  border-radius: 20px;
+}
+
+.message.sent {
+  text-align: right;
+}
+
+.message.sent > div {
+  background-color: #f700cd;
+  color: white;
+}

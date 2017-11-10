@@ -7,40 +7,40 @@ var router = express.Router();
 var UserModel = require('../models/user');
 var auth = require('../utils/auth');
 
-router.get('/search', function(req, res) {
-  var tags = req.query.tags.split(',');
-  UserModel.find({
-    tags: {
-      $in: tags
-    }
-  }).lean()
-    .exec()
-    .then(function(users) {
-      users.forEach(function(user) {
-        // user = user.toObject();
-        let count = 0;
-        tags.forEach(function(tag) {
-          if(user.tags.includes(tag)) {
-            count++;
-          }
-        })
+// router.get('/search', function(req, res) {
+//   var tags = req.query.tags.split(',');
+//   UserModel.find({
+//     tags: {
+//       $in: tags
+//     }
+//   }).lean()
+//     .exec()
+//     .then(function(users) {
+//       users.forEach(function(user) {
+//         // user = user.toObject();
+//         let count = 0;
+//         tags.forEach(function(tag) {
+//           if(user.tags.includes(tag)) {
+//             count++;
+//           }
+//         })
 
-        user.tagsFound = count;
-        return user;
-      })
+//         user.tagsFound = count;
+//         return user;
+//       })
 
-      users.sort(function(a, b) {
-        if(a.tagsFound < b.tagsFound) return 1;
-        if(a.tagsFound > b.tagsFound) return -1;
-        return 0;
-      })
+//       users.sort(function(a, b) {
+//         if(a.tagsFound < b.tagsFound) return 1;
+//         if(a.tagsFound > b.tagsFound) return -1;
+//         return 0;
+//       })
       
-      res.json(users);
-    })
-    .catch(function(err) {
-      res.send(err);
-    })
-})
+//       res.json(users);
+//     })
+//     .catch(function(err) {
+//       res.send(err);
+//     })
+// })
 
 router.get('/random', function(req, res) {
   const randomTags = [
@@ -221,6 +221,16 @@ router.post('/register', function(req, res) {
 });
 
 router.use(auth.requireLogin);
+
+router.get('/search', function(req, res) {
+  UserModel.findOne({ email: req.query.email })
+    .then(function(user) {
+      res.json(user);
+    })
+    .catch(function(err) {
+      res.status(500).send(err);
+    });
+});
 
 router.patch('/', upload.array(), function(req, res) {
   var body = req.body;

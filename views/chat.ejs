@@ -1,0 +1,129 @@
+<% include header %>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  var socket = io({
+    query: {
+      id: '<%= user._id %>'
+    }
+  });
+</script>
+
+<div class="container-fluid" id="chat-section">
+  <div class="row">
+    <div class="col-md-2">
+      <ul class="list-group" id="users-list">
+        <li class="list-group-item">
+          <button class="btn btn-info" id="add-user">
+            <i class="fa fa-plus-circle" aria-hidden="true"></i>
+            ADD USER
+          </button>
+        </li>
+      </ul>
+    </div>
+    <div class="col-md-10" id="messages-container">
+      <div id="message-list-container">
+        <ul id="message-list">
+          
+        </ul>
+      </div>
+      <div id="message-input-container">
+        <input placeholder="Enter message..." type="text" class="form-control" id="message-input" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var messageListContainer;
+  var messageList;
+  var messageInput;
+  var selectedUserId = null;
+  var usersList;
+  $(function() {
+    usersList = $('#users-list');
+    messageListContainer = $('#message-list-container');
+    messageList = $('#message-list');
+    messageInput = $('#message-input');
+
+    $.get('/chat/conversations')
+    .then(function(res) {
+      res.forEach(function(chat) {
+        usersList.append(
+          `<li class="list-group-item" data-id="${chat.user.id}" data-identifier="${chat.identifier}">${chat.user.name}</li>`
+        )
+      });
+    })
+    .catch(function(err) {
+      console.log(err);
+    })
+
+    messageInput.on('keyup', function(e) {
+      var message = this.value.trim();
+      if (selectedUserId !== null && e.keyCode === 13 && message !== '') {
+        $.ajax({
+          url: `/chat/${selectedUserId}`,
+          type: 'POST',
+          data: { message }
+        })
+        .then(function(newChat) {
+          messageInput.val('');
+        })
+        .catch(function(err) {
+          console.log(err);
+        });
+      }
+    });
+
+    $('#add-user').on('click', function() {
+      var userEmail = prompt('Email of blah');
+      $.ajax({
+        url: '/user/search',
+        type: 'GET',
+        data: {
+          email: userEmail
+        }
+      })
+      .then(function(res) {
+        selectedUserId = res._id;
+        usersList.find('li').removeClass('selected-user');
+        usersList.append(
+          `<li class="list-group-item selected-user" data-id="${res._id}">${res.name}</li>`
+        )
+      })
+      .catch(function(err) {
+        console.log(err);
+      });
+    });
+
+    usersList.on('click', 'li', function() {
+      $(this).addClass('selected-user').siblings().removeClass('selected-user');
+      selectedUserId = $(this).attr('data-id');
+      var identifier = $(this).attr('data-identifier');
+      messageList.text('');      
+      $.get(`/chat/${identifier}`)
+        .then(function(chats) {
+          chats.forEach(function(chat) {
+            var li = $('<li/>').addClass('message').html(`<div>${chat.message}</div>`);
+            if (chat.sender.id !== selectedUserId) {
+              li.addClass('sent');
+            }
+            messageList.append(li);
+          });
+          messageListContainer[0].scrollTop = messageListContainer[0].scrollHeight;
+        })
+        .catch(function(err) {
+          console.log(err);
+        });
+    });
+  });
+
+  socket.on('chat', function(chat) {
+    var li = $('<li/>').addClass('message').html(`<div>${chat.message}</div>`);
+    if (chat.sender.id !== selectedUserId) {
+      li.addClass('sent');
+    }
+    messageList.append(li);
+    messageListContainer[0].scrollTop = messageListContainer[0].scrollHeight;
+  })
+</script>
+<% include footer %>
