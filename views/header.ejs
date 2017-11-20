@@ -8,6 +8,36 @@
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+    <script>
+      function snackbar(message) {
+        var blah = $('#snackbar');
+        blah.addClass('show').text(message);
+        setTimeout(function(){ blah.removeClass('show') }, 3000);
+      }
+    </script>
+    <% if(typeof user !== undefined) { %>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      var unread_messages = 0;
+      var socket = io({
+        query: {
+          id: '<%= user._id %>'
+        }
+      });
+      $(function() {
+        socket.on('notifications', function(obj) {
+          let message = `${obj.data.sender.name}: ${obj.data.message}`;
+          snackbar(message);
+          unread_messages++;
+          if(unread_messages > 0) {
+            $('#unread_messages').text(`(${unread_messages})`);
+          } else {
+            $('#unread_messages').text('');
+          }
+        })
+      })
+    </script>
+    <% } %>
   </head>
   <body>
 
@@ -16,9 +46,12 @@
 
       <div>
         <% if(typeof user !== 'undefined' && user) { %>
+          <a href="/chat"><i class="fa fa-comment" aria-hidden="true"></i> Chat <span id="unread_messages"></span></a>
           <a href="/user"><i class="fa fa-user-circle" aria-hidden="true"></i> <%= user.name %></a>
           <a href="/user/logout">LOGOUT</a>
         <% } %>
       </div>
       
     </nav>
+
+    <div id="snackbar"></div>

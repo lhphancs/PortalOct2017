@@ -96,6 +96,10 @@ router.post('/:userId', function(req, res) {
     })
     .then(function(newChat) {
       socketio.instance().to(`chat_${identifier}`).emit('chat', newChat);
+      socketio.sockets()[recipientId].emit('notifications', {
+        type: 'new_message',
+        data: newChat
+      });
       return res.status(201).json(newChat);
     })
     .catch(function(err) {

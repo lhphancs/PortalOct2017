@@ -1,12 +1,4 @@
 <% include header %>
-<script src="/socket.io/socket.io.js"></script>
-<script>
-  var socket = io({
-    query: {
-      id: '<%= user._id %>'
-    }
-  });
-</script>
 
 <div class="container-fluid" id="chat-section">
   <div class="row">
